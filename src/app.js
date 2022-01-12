@@ -15,7 +15,8 @@ app.get("/repositories", (request, response) => {
 });
 
 app.post("/repositories", (request, response) => {
-  const {title, url, techs} = request.body;
+  const { title, url, techs } = request.body;
+
   const repo = {
     id: uuid(),
     title: title,
@@ -30,32 +31,49 @@ app.post("/repositories", (request, response) => {
 
 app.put("/repositories/:id", (request, response) => {
   const { id } = request.params;
-  const { title, url, techs } = request.body;
-
-  const items = {
-    id,
-    title,
-    url,
-    techs, 
-  }
+  const { title, url, techs, likes } = request.body;
 
   const position = repositories.findIndex(item => item.id == id);
+  if(position == -1){
+    return response.status(400).json({Error: 'Repositorie Not Found'});
+  }
+
+  items = {
+    id: id,
+    title: title,
+    url: url,
+    techs: techs,
+    likes: repositories[position].likes
+  }
+
   repositories[position] = items;
   response.json(repositories[position]);
-
 });
 
 app.delete("/repositories/:id", (request, response) => {
   const { id } = request.params;
 
-  const position = repositories.findIndex(item => item.id == id)
+  const position = repositories.findIndex(item => item.id == id);
+  if(position == -1){
+    return response.status(400).json({Error: 'Repositorie Not Found'});
+  }
   repositories.splice(position);
 
-  response.json(repositories);
+  response.status(204).send();
 });
 
 app.post("/repositories/:id/like", (request, response) => {
-  // TODO
+  const { id } = request.params;
+
+  const position = repositories.findIndex(item => item.id == id);
+
+  if(position == -1){
+    return response.status(400).json({Error: 'Like Not Found'});
+  }
+
+  repositories[position].likes +=1;
+  response.json(repositories[position]);
+
 });
 
 module.exports = app;
